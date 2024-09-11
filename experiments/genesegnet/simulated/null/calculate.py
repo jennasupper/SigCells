@@ -10,13 +10,13 @@ import sys
 
 if __name__=="__main__":
     
-    print(f"SI P-Value, Negative control Cellpose N(0, 1)")
+    print(f"SI P-Value, Negative control GeneSegNet N(0, 1)")
     # load model
-    path_56 = "/scratch/user/s4702415/trained_models/cellpose/cellpose_n56.onnx/cyto3.onnx"
+    path_56 = "/scratch/user/s4702415/trained_models/genesegnet/genesegnet_n56/GeneSegNet_hippocampus_residual_on_style_on_concatenation_off.929131_epoch_499.onnx"
     model = onnx.load(path_56)
 
     d = 56
-    # should i use uniform or Gaussian noise
+    # should i use uniform or Gaussian noise - Gaussian
     noise = torch.randn(1, 2, d, d)
 
     start = time.time()

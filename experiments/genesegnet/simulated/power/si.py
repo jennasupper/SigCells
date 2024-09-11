@@ -28,7 +28,7 @@ class SI4ONNX(si.SI4ONNX):
         input_x = X
         input_vec = input_x.reshape(-1).double()
 
-        output_x, _, _, _, _, _= self.si_model.forward(input_x)
+        output_x, _, = self.si_model.forward(input_x)
 
         # output_x = output_x.numpy()
 
