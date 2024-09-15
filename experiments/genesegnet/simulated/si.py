@@ -92,7 +92,9 @@ class SI4ONNX(si.SI4ONNX):
         conf_bias = output_bias[0][:, 2, :, :]
         conf_bias = torch.stack([conf_bias, conf_bias], dim=1)
         conf_a = output_a[0][:, 2, :, :]
+        conf_a = torch.stack([conf_a, conf_a], dim=1)
         conf_b = output_b[0][:, 2, :, :]
+        conf_b = torch.stack([conf_b, conf_b], dim=1)
         conf_l = l[0]
         conf_u = u[0]
 

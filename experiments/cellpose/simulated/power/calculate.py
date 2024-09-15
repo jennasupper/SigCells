@@ -1,7 +1,6 @@
 import onnx
 import torch
 import numpy as np
-from si import SI4ONNX
 import matplotlib.pyplot as plt
 import plotly.express as px
 import onnxruntime as ort
@@ -18,13 +17,22 @@ from transforms import convert_image
 sys.path.append("/scratch/user/s4702415/SigCells/data")
 from simulations import gen_cells, get_ground_truth, gen_heatmap, display_confusion
 
+sys.path.append("/scratch/user/s4702415/SigCells/experiments/cellpose/simulated")
+from si import SI4ONNX
+
+import argparse
+
 
 if __name__=="__main__":
     # experiment settings
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("colour")
+    args = parser.parse_args()
     d = 56
     n = 3
     r = 4
-    colour = (1, 0, 0)
+    colour = (float(args.colour), 0, 0)
 
     path_56 = "/scratch/user/s4702415/trained_models/cellpose/cellpose_n56.onnx/cyto3.onnx"
     model_56 = onnx.load(path_56)
@@ -54,6 +62,7 @@ if __name__=="__main__":
     # note: cellpose has more FNs due to absence of second channel
     display_confusion(s, mask, d)
 
-    # start = time.time()
-    p_value = si_unet.inference(image, var=1.0, termination_criterion='decision', over_conditioning=True)
+    start = time.time()
+    p_value = si_unet.inference(image, var=1.0, termination_criterion='decision')
     print(f"p_value = {p_value}")
+    print(f"Time = {time.time() - start}")

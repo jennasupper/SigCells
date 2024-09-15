@@ -30,21 +30,8 @@ class SI4ONNX(si.SI4ONNX):
 
         output_x, _, _, _, _, _= self.si_model.forward(input_x)
 
-        # output_x = output_x.numpy()
-
-        # mask, p = compute_masks(output_x[0, :2, :, :], output_x[0, 2, :, :], confidence_threshold=0.5)
-
-        # mask = mask.astype(np.float64)
-        # # plt.imshow(output_x[0, 2, :, :])
-        # # plt.savefig("/scratch/user/s4702415/SigCells/experiments/cellpose/simulated/null/test_images/output_x_2.png")
-        # mask = torch.tensor(mask)
-        # mask = torch.stack([mask, mask]
-        # make sure to save images of masks
-
         mask = output_x[0, 2, :, :]
         mask = torch.stack([mask, mask])
-
-        # print(mask.shape)
 
         anomaly_region = mask > self.thr
         anomaly_index = anomaly_region.reshape(-1).int()
@@ -68,9 +55,6 @@ class SI4ONNX(si.SI4ONNX):
         sd: float = np.sqrt(self.si_calculator.eta_sigma_eta)
         self.max_tail = sd * 10 + torch.abs(self.si_calculator.stat) # Exploration range
 
-        # plt.imshow(mask[0, :, :])
-        # plt.savefig(f"/scratch/user/s4702415/cellpose_true_mask_images/mask_{time.time()}.png")
-
     def model_selector(self, anomaly_index):
         return torch.all(torch.eq(self.anomaly_index_obs, anomaly_index))
 
@@ -92,7 +76,9 @@ class SI4ONNX(si.SI4ONNX):
         conf_bias = output_bias[0][:, 2, :, :]
         conf_bias = torch.stack([conf_bias, conf_bias], dim=1)
         conf_a = output_a[0][:, 2, :, :]
+        conf_a = torch.stack([conf_a, conf_a], dim=1)
         conf_b = output_b[0][:, 2, :, :]
+        conf_b = torch.stack([conf_b, conf_b], dim=1)
 
         conf_l = l[0]
         conf_u = u[0]
