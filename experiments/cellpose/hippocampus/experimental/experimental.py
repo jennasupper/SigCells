@@ -45,17 +45,16 @@ if __name__=="__main__":
 
     zeros = torch.zeros(size=(d, d), dtype=torch.float64) + torch.randn(size=(d, d))
 
-    dapi = torch.tensor(dapi, dtype=torch.float64) + torch.randn(size=(d, d))
-
+    dapi = torch.tensor(dapi, dtype=torch.float64)
     input_x = torch.stack([dapi, zeros], dim=0)
     input_x = input_x.unsqueeze(0)
 
-    si_unet = SI4ONNX(model_56, thr=0.5)
-    start = time.time()
-    p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision")
-    print(p_value)
+    # si_unet = SI4ONNX(model_56, thr=0.5)
+    # start = time.time()
+    # p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision")
+    # print(p_value)
 
-    print(f"time = {time.time() - start}")
+    # print(f"time = {time.time() - start}")
 
 
         # spots = process_spots(rna, image_shape, ysub, xsub, j, i)

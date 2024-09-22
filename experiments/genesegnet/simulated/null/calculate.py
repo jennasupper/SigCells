@@ -1,6 +1,8 @@
 import onnx
 import torch
 import numpy as np
+import sys
+sys.path.append("/scratch/user/s4702415/SigCells/experiments/genesegnet/simulated")
 from si import SI4ONNX
 import time
 

@@ -12,4 +12,4 @@
 module load python/3.11
 source /home/s4702415/sivenvgpu/bin/activate
 
-srun python /scratch/user/s4702415/SigCells/experiments/genesegnet/simulated/power/calculate.py 1
+srun python /scratch/user/s4702415/SigCells/experiments/genesegnet/simulated/power/calculate.py 0.01

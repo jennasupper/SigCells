@@ -10,7 +10,7 @@ sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
 from dynamics import gen_pose_target, compute_masks
 
 
-def gen_cells(d: int, n: int, r: int, colour: tuple):
+def gen_cells(d: int, n: int, r: int, colour: tuple, centre, variance):
     """
     Parameters:
         d: image size
@@ -22,13 +22,22 @@ def gen_cells(d: int, n: int, r: int, colour: tuple):
     """
     image = np.zeros(shape=(d, d, 3), dtype=np.float32)
 
-    centre = [(np.random.randint(low=0, high=d), np.random.randint(
-        low=0, high=d)) for _ in range(n)]
+    # centre = [(np.random.randint(low=0, high=d), np.random.randint(
+    #     low=0, high=d)) for _ in range(n)]
 
     for i in range(n):
         image = cv2.circle(image, centre[i], r, colour, -1)
 
-    return torch.tensor(image[:, :, 0]), centre
+    image = image[:, :, 0]
+
+    for j in range(d):
+        for i in range(d):
+            if image[j][i]:
+                image[j][i] = np.random.normal(loc=1, scale=variance)
+            else:
+                image[j][i] = np.random.normal(loc=0.0, scale=variance)
+
+    return torch.tensor(image), centre
 
 def get_ground_truth(cells):
 
@@ -40,10 +49,18 @@ def get_ground_truth(cells):
 
     return s
 
-def gen_heatmap(centre, d):
+def gen_heatmap(centre, d, variance=None):
 
     centre_array = np.array([[x, y] for x, y in centre])
     gm = gen_pose_target(centre_array, 'cpu', h=d, w=d)
+
+    if variance:
+        for j in range(d):
+            for i in range(d):
+                if gm[j][i]:
+                    gm[j][i] = np.random.normal(loc=gm[j][i], scale=variance)
+                else:
+                    gm[j][i] = np.random.normal(loc=0.0, scale=variance)
 
     return gm
 

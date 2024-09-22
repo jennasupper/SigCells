@@ -55,7 +55,7 @@ if __name__=="__main__":
 
     si_unet = SI4ONNX(model_56, thr=0.5)
     start = time.time()
-    p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision")
+    p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision", significance_level=0.01)
     print(p_value)
 
     print(f"time = {time.time() - start}")
