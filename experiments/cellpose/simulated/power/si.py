@@ -6,13 +6,13 @@ import torch
 
 from sicore import NaiveInferenceNorm, SelectiveInferenceNorm
 # sys.path.append("/scratch/user/s4702415/SigCells/SigCells")
-sys.path.append("/scratch/user/s4702415/si4onnx_fork/si4onnx")
+sys.path.append("/scratch/pawsey1073/jsupper/si4onnx")
 
 from si4onnx import si
 from si4onnx.utils import threshold
 
 # sys.path.append("/scratch/user/s4702415/SigCells/data")
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
+sys.path.append("/scratch/pawsey1073/jsupper/GeneSegNet/GeneSegNet")
 from dynamics import compute_masks
 
 import matplotlib.pyplot as plt

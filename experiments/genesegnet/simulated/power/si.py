@@ -6,13 +6,13 @@ import torch
 
 from sicore import NaiveInferenceNorm, SelectiveInferenceNorm
 # sys.path.append("/scratch/user/s4702415/SigCells/SigCells")
-sys.path.append("/scratch/user/s4702415/si4onnx_fork/si4onnx")
+sys.path.append("/scratch/pawsey1073/jsupper/si4onnx")
 
 from si4onnx import si
 from si4onnx.utils import threshold
 
 # sys.path.append("/scratch/user/s4702415/SigCells/data")
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
+sys.path.append("/scratch/pawsey1073/jsupper/GeneSegNet/GeneSegNet")
 from dynamics import compute_masks
 
 import matplotlib.pyplot as plt
@@ -43,6 +43,8 @@ class SI4ONNX(si.SI4ONNX):
 
         mask = output_x[0, 2, :, :]
         mask = torch.stack([mask, mask])
+
+        # mask = output_x[0, 1:, :, :]
 
         # print(mask.shape)
 
@@ -92,7 +94,15 @@ class SI4ONNX(si.SI4ONNX):
         conf_bias = output_bias[0][:, 2, :, :]
         conf_bias = torch.stack([conf_bias, conf_bias], dim=1)
         conf_a = output_a[0][:, 2, :, :]
+        conf_a = torch.stack([conf_a, conf_a], dim=1)
         conf_b = output_b[0][:, 2, :, :]
+        conf_b = torch.stack([conf_b, conf_b], dim=1)
+        # conf_x = output_x[0][:, 1:, :, :]
+        # conf_bias = output_bias[0][:, 1:, :, :]
+        # conf_a = output_a[0][:, 1:, :, :]
+        # conf_b = output_b[0][:, 1:, :, :]
+        # conf_l = l[0]
+        # conf_u = u[0]
 
         conf_l = l[0]
         conf_u = u[0]

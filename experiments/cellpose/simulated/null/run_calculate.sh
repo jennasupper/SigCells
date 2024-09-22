@@ -1,15 +1,14 @@
 #!/bin/bash
-#SBATCH -A a_mar
+#SBATCH -A pawsey1073
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
-#SBATCH --partition=general
-#SBATCH --time 48:00:00
+#SBATCH --partition=work
+#SBATCH --time 24:00:00
 #SBATCH --mem=16GB
-#SBATCH --array=1-500
+#SBATCH --array=1-10
 
-cd /scratch/user/s4702415/Honours/models/test_cellpose
-module load python/3.11
-source /home/s4702415/sivenvgpu/bin/activate
+module load python/3.11.6
+source /scratch/pawsey1073/jsupper/sivenv/bin/activate
 
-srun python /scratch/user/s4702415/SigCells/experiments/cellpose/simulated/null/calculate.py
+srun python /scratch/pawsey1073/jsupper/SigCells/experiments/cellpose/simulated/null/calculate.py

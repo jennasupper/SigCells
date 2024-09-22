@@ -11,4 +11,4 @@
 module load python/3.11.6
 source /scratch/pawsey1073/jsupper/sivenv/bin/activate
 
-srun -N 1 -n 1 -c 1 python /scratch/pawsey1073/jsupper/SigCells/experiments/cellpose/simulated/power/calculate.py
+srun -N 1 -n 1 -c 1 python /scratch/pawsey1073/jsupper/SigCells/experiments/cellpose/simulated/power/calculate.py 0.001

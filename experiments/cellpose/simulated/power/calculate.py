@@ -2,7 +2,6 @@ import onnx
 import torch
 import numpy as np
 from si import SI4ONNX
-import matplotlib.pyplot as plt
 import plotly.express as px
 import onnxruntime as ort
 
@@ -11,33 +10,48 @@ import os
 import cv2
 import time
 
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
+sys.path.append("/scratch/pawsey1073/jsupper/GeneSegNet/GeneSegNet")
 from dynamics import gen_pose_target, compute_masks
 from transforms import convert_image
 
-sys.path.append("/scratch/user/s4702415/SigCells/data")
+sys.path.append("/scratch/pawsey1073/jsupper/SigCells/data")
 from simulations import gen_cells, get_ground_truth, gen_heatmap, display_confusion
+
+import argparse
 
 
 if __name__=="__main__":
+    # sess_opts = ort.SessionOptions()
+
+    # if "OMP_NUM_THREADS" in os.environ:
+    #     sess_opts.inter_op_num_threads = int(os.environ["OMP_NUM_THREADS"])
+    #     sess_opts.intra_op_num_threads = int(os.environ["OMP_NUM_THREADS"])
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("variance")
+    args = parser.parse_args()
+
     # experiment settings
     d = 56
     n = 3
     r = 4
     colour = (1, 0, 0)
+    variance = float(args.variance)
 
-    path_56 = "/scratch/user/s4702415/trained_models/cellpose/cellpose_n56.onnx/cyto3.onnx"
+    path_56 = "/scratch/pawsey1073/jsupper/trained_models/cellpose/n56/cyto3.onnx"
     model_56 = onnx.load(path_56)
 
-    print(f"Power experiment (cellpose), d = {d}, n_cells = {n}, r = {r}, colour = {colour}")
+    start = time.time()
 
-    cells, centre = gen_cells(d, n, r, colour)
+    print(f"Power experiment (cellpose), d = {d}, n_cells = {n}, r = {r}, colour = {colour}, variance = {variance}")
+    centre = [(np.random.randint(low=0, high=d), np.random.randint(low=0, high=d)) for _ in range(n)]
+                                             
+
+    cells, centre = gen_cells(d, n, r, colour, centre, variance)
     s = get_ground_truth(cells)
-    gm = torch.zeros(size=(d, d))
-    image = torch.stack([cells, gm])
-    # try without noise?
-    # image = image + torch.tensor(np.random.uniform(low=0.0, high=0.0001, size=(2, d, d)), dtype=torch.float)
-    image = image + torch.tensor(np.random.normal(loc=0.0, scale=0.001, size=(2, d, d)), dtype=torch.float)
+    membrane, centre = gen_cells(d, n, r + 2, colour, centre, variance)
+    image = torch.stack([membrane, cells])
+    # image = image #+ torch.tensor(np.random.normal(loc=0.0, scale=variance, size=(2, d, d)), dtype=torch.float)
 
     ort_sess = ort.InferenceSession(path_56)
     si_unet = SI4ONNX(model_56, thr=0.5)
@@ -55,5 +69,6 @@ if __name__=="__main__":
     display_confusion(s, mask, d)
 
     # start = time.time()
-    p_value = si_unet.inference(image, var=1.0, termination_criterion='decision', over_conditioning=True)
+    p_value = si_unet.inference(image, var=1.0, termination_criterion='decision', significance_level=0.01)
     print(f"p_value = {p_value}")
+    print(f"time = {time.time() - start}")
