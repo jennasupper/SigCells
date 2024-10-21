@@ -7,7 +7,7 @@ import cv2
 import time
 
 sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
-from dynamics import gen_pose_target, compute_masks
+from dynamics import gen_pose_target
 
 
 def gen_cells(d: int, n: int, r: int, colour: tuple, centre, variance):
@@ -30,37 +30,43 @@ def gen_cells(d: int, n: int, r: int, colour: tuple, centre, variance):
 
     image = image[:, :, 0]
 
-    for j in range(d):
-        for i in range(d):
-            if image[j][i]:
-                image[j][i] = np.random.normal(loc=1, scale=variance)
-            else:
-                image[j][i] = np.random.normal(loc=0.0, scale=variance)
-
-    return torch.tensor(image), centre
-
-def get_ground_truth(cells):
-
     s = []
-    for row, i in enumerate(cells):
+    for row, i in enumerate(image):
         for col, j in enumerate(i):
             if j:
                 s.append((row, col))
 
-    return s
+    for j in range(d):
+        for i in range(d):
+            if image[j][i]:
+                image[j][i] = 1 + -abs(np.random.normal(loc=0.0, scale=variance))
+            else:
+                image[j][i] = abs(np.random.normal(loc=0.0, scale=variance))
+
+    return torch.tensor(image), centre, s
+
+# def get_ground_truth(cells):
+
+#     s = []
+#     for row, i in enumerate(cells):
+#         for col, j in enumerate(i):
+#             if j:
+#                 s.append((row, col))
+
+#     return s
 
 def gen_heatmap(centre, d, variance=None):
 
     centre_array = np.array([[x, y] for x, y in centre])
     gm = gen_pose_target(centre_array, 'cpu', h=d, w=d)
 
-    if variance:
-        for j in range(d):
-            for i in range(d):
-                if gm[j][i]:
-                    gm[j][i] = np.random.normal(loc=gm[j][i], scale=variance)
-                else:
-                    gm[j][i] = np.random.normal(loc=0.0, scale=variance)
+    # if variance:
+    #     for j in range(d):
+    #         for i in range(d):
+    #             if gm[j][i]:
+    #                 gm[j][i] = np.random.normal(loc=gm[j][i], scale=variance)
+    #             else:
+    #                 gm[j][i] = np.random.normal(loc=0.0, scale=variance)
 
     return gm
 
@@ -81,6 +87,29 @@ def display_confusion(gt, mask, d):
     print(f"fplen = {len(fp)}")
     print(f"fnlen = {len(fn)}")
     print(f"tnlen = {len(tn)}")
+
+    return tp, fp, fn, tn
+
+def calculate_mean_intensity(tp, fp, fn, tn, image):
+
+    object_int = 0
+    bg_int = 0
+
+    for i, j in tp:
+        object_int += image[i][j]
+    for i, j in fp:
+        object_int += image[i][j]
+    for i, j in fn:
+        bg_int += image[i][j]
+    for i, j in tn:
+        bg_int += image[i][j]
+        # object_mean = (sum(np.random.normal(loc=1, scale=variance, size=tp)) + sum(np.random.normal(loc=0, scale=variance, size=fp)))/(tp + fp)
+        # background_mean = (sum(np.random.normal(loc=1, scale=variance, size=fn)) + sum(np.random.normal(loc=0, scale=variance, size=tn)))/(fn + tn)
+    object_mean = object_int / (len(tp) + len(fp))
+    bg_mean = bg_int / (len(fn) + len(tn))
+
+    return object_mean, bg_mean
+
 
 # def 
 

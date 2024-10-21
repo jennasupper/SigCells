@@ -10,11 +10,8 @@ from data_io import get_tile_dims, process_morphology, process_spots
 import os
 import torch
 import time
-
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
 from dynamics import gen_pose_target
 from transforms import make_tiles
-# from transforms import normalize99
 
 import numpy as np
 

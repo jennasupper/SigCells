@@ -41,13 +41,11 @@ if __name__=="__main__":
         spots = process_spots(rna, image_shape, ysub, xsub, j, i)
         spots = np.array(spots)
 
-        heatmap = gen_pose_target(spots, 'cpu', h=d, w=d, sigma=1)
+        heatmap = gen_pose_target(spots, 'cpu', h=d, w=d, sigma=2)
 
         dapi = tile[0]
-        if dapi.max() != 0 and heatmap.max() != 0:
+        if dapi.max() > 0.5 and heatmap.max() != 0:
             break
-
-    gm = heatmap
 
     dapi = torch.tensor(dapi, dtype=torch.float64)
 

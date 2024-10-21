@@ -16,7 +16,7 @@ from dynamics import gen_pose_target, compute_masks
 from transforms import convert_image
 
 sys.path.append("/scratch/user/s4702415/SigCells/data")
-from simulations import gen_cells, get_ground_truth, gen_heatmap, display_confusion
+from simulations import gen_cells, gen_heatmap, display_confusion, calculate_mean_intensity
 
 sys.path.append("/scratch/user/s4702415/SigCells/experiments/genesegnet/simulated")
 from si import SI4ONNX
@@ -29,14 +29,18 @@ if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("variance")
+    # parser.add_argument("n")
     args = parser.parse_args()
 
     # experiment settings
     d = 56
+    # n = int(args.n)
+    # r = int(args.r)
     n = 3
     r = 4
     colour = (1, 0, 0)
     variance = float(args.variance)
+    # variance = 0.001
 
     path_56 = "/scratch/user/s4702415/trained_models/genesegnet/genesegnet_n56/GeneSegNet_hippocampus_residual_on_style_on_concatenation_off.929131_epoch_499.onnx"
     model_56 = onnx.load(path_56)
@@ -44,9 +48,9 @@ if __name__=="__main__":
     print(f"Power experiment (genesegnet), d = {d}, n_cells = {n}, r = {r}, colour = {colour}, variance = {variance}")
     centre = [(np.random.randint(low=0, high=d), np.random.randint(low=0, high=d)) for _ in range(n)]
 
-    cells, centre = gen_cells(d, n, r, colour, centre, variance)
-    s = get_ground_truth(cells)
-    gm = gen_heatmap(centre, d, variance=variance) #+ torch.tensor(np.random.normal(loc=0.0, scale=1, size=(2, d, d)), dtype=torch.float)
+    cells, centre, s = gen_cells(d, n, r, colour, centre, variance)
+    # s = get_ground_truth(cells)
+    gm = gen_heatmap(centre, d, variance=None) #+ torch.tensor(np.random.normal(loc=0.0, scale=1, size=(2, d, d)), dtype=torch.float)
     image = torch.stack([cells, gm])
 
     ort_sess = ort.InferenceSession(path_56)
@@ -61,9 +65,15 @@ if __name__=="__main__":
 
     mask = output[0, 2, :, :] > 0.5
 
-    display_confusion(s, mask, d)
+    # display_confusion(s, mask, d)
+
+    tp, fp, fn, tn = display_confusion(s, mask, d)
+
+    object_mean, bg_mean = calculate_mean_intensity(tp, fp, fn, tn, image[0, 0, :, :])
+    print(f"DAPI Object_mean = {object_mean}, Bg_mean = {bg_mean}")
+
 
     start = time.time()
-    p_value = si_unet.inference(image, var=1.0, termination_criterion='decision', significance_level=0.01)
+    p_value = si_unet.inference(image, var=1.0, significance_level=0.05, over_conditioning=True)
     print(f"p_value = {p_value}")
     print(f"Time = {time.time() - start}")

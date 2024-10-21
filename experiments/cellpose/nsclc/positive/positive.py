@@ -16,6 +16,7 @@ sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
 from dynamics import gen_pose_target
 from transforms import make_tiles
 # from transforms import normalize99
+import onnxruntime as ort
 
 import numpy as np
 
@@ -42,19 +43,22 @@ if __name__=="__main__":
 
         dapi = tile[1]
         membrane = tile[0]
-        if membrane.max() != 0 and dapi.max() != 0:
-            break
+        if membrane.max() > 0.5 and dapi.max() > 0.5:
 
-    membrane = torch.tensor(membrane, dtype=torch.float64)
+            membrane = torch.tensor(membrane, dtype=torch.float)
 
-    dapi = torch.tensor(dapi, dtype=torch.float64)
+            dapi = torch.tensor(dapi, dtype=torch.float)
 
-    input_x = torch.stack([membrane, dapi], dim=0)
-    input_x = input_x.unsqueeze(0)
+            input_x = torch.stack([membrane, dapi], dim=0)
+            input_x = input_x.unsqueeze(0)
+            ort_sess = ort.InferenceSession(path_56)
+            output, _, _, _, _, _ = ort_sess.run(None, {'input': input_x.numpy()})
+            if output[0, 2, :, :].max() > 4:
+                break
 
     si_unet = SI4ONNX(model_56, thr=0.5)
     start = time.time()
-    p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision", significance_level=0.01)
+    p_value = si_unet.inference(input_x, var=1.0, termination_criterion="decision", significance_level=0.05)
     print(p_value)
 
     print(f"time = {time.time() - start}")

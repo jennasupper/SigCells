@@ -4,15 +4,13 @@ from time import time
 import numpy as np
 import torch
 
-from sicore import NaiveInferenceNorm, SelectiveInferenceNorm
-# sys.path.append("/scratch/user/s4702415/SigCells/SigCells")
-sys.path.append("/scratch/user/s4702415/si4onnx_fork/si4onnx")
+from sicore import SelectiveInferenceNorm
+sys.path.append("/scratch/user/s4702415/SigCells/SigCells")
 
-from si4onnx import si
-from si4onnx.utils import threshold
+import si
+from utils import threshold
 
-# sys.path.append("/scratch/user/s4702415/SigCells/data")
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
+sys.path.append("/scratch/user/s4702415/SigCells/data")
 from dynamics import compute_masks
 
 import matplotlib.pyplot as plt
@@ -46,14 +44,15 @@ class SI4ONNX(si.SI4ONNX):
         self.si_calculator = SelectiveInferenceNorm(
             input_vec, self.var, eta, use_torch=True
         )
-        self.si_calculator_naive = NaiveInferenceNorm(
-            input_vec, self.var, eta, use_torch=True
-        )
+        # self.si_calculator_naive = NaiveInferenceNorm(
+        #     input_vec, self.var, eta, use_torch=True
+        # )
         
-        assert not torch.isnan(self.si_calculator.stat) # if nan, anomaly_index is all the same
+        # assert not torch.isnan(self.si_calculator.stat) # if nan, anomaly_index is all the same
+        assert not torch.isnan(self.si_calculator.stat)
 
-        sd: float = np.sqrt(self.si_calculator.eta_sigma_eta)
-        self.max_tail = sd * 10 + torch.abs(self.si_calculator.stat) # Exploration range
+        # sd: float = np.sqrt(self.si_calculator.eta_sigma_eta)
+        # self.max_tail = sd * 10 + torch.abs(self.si_calculator.stat) # Exploration range
 
     def model_selector(self, anomaly_index):
         return torch.all(torch.eq(self.anomaly_index_obs, anomaly_index))
@@ -65,8 +64,11 @@ class SI4ONNX(si.SI4ONNX):
         input_bias = torch.zeros(B, C, H, W).double()
         input_a = a.reshape(B, C, H, W)
         input_b = b.reshape(B, C, H, W)
-        l = -self.max_tail
-        u = self.max_tail
+        INF = torch.tensor(float("inf"), dtype=torch.float64)
+        l = -INF
+        u = INF
+        # l = -self.max_tail
+        # u = self.max_
 
         output_x, output_bias, output_a, output_b, l, u = self.si_model.forward_si(
             input_x, input_bias, input_a, input_b, l, u
@@ -91,8 +93,8 @@ class SI4ONNX(si.SI4ONNX):
 
         return anomaly_index, [l, u]
     
-    def naive_inference(self, inputs, var, **kwargs):
-        self.var = var
-        self.construct_hypothesis(inputs)
-        result = self.si_calculator_naive.inference()
-        return result
+    # def naive_inference(self, inputs, var, **kwargs):
+    #     self.var = var
+    #     self.construct_hypothesis(inputs)
+    #     result = self.si_calculator_naive.inference()
+    #     return result

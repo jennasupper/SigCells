@@ -5,12 +5,25 @@ import cv2
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-
-sys.path.append("/scratch/user/s4702415/GeneSegNet")
-sys.path.append("/scratch/user/s4702415/GeneSegNet/GeneSegNet")
 from dynamics import gen_pose_target
-from transforms import make_tiles, normalize_img, normalize99
+from transforms import make_tiles, normalize99
 
+
+def center_crop(img, dim):
+    """Returns center cropped image
+
+    Args:
+    img: image to be center cropped
+    dim: dimensions (width, height) to be cropped from center
+    """
+    width, height = img.shape[1], img.shape[0]
+    #process crop width and height for max available dimension
+    crop_width = dim[0] if dim[0]<img.shape[1] else img.shape[1]
+    crop_height = dim[1] if dim[1]<img.shape[0] else img.shape[0] 
+    mid_x, mid_y = int(width/2), int(height/2)
+    cw2, ch2 = int(crop_width/2), int(crop_height/2) 
+    crop_img = img[mid_y-ch2:mid_y+ch2, mid_x-cw2:mid_x+cw2]
+    return crop_img
 
 def get_tile_dims(img_path, technology, d, border=0):
     image = membrane = dapi = None
@@ -29,12 +42,13 @@ def get_tile_dims(img_path, technology, d, border=0):
         image = image[:, 5000:10000, 30000:35000]
         membrane = np.sum(image[1:, :, :], axis=0)
         dapi = image[0, :, :]
-        image = normalize_img(np.stack([membrane, dapi]))
+        image = normalize99(np.stack([membrane, dapi]))
 
     if technology == "Custom":
-        image = tifffile.imread(img_path)
+        # image = tifffile.imread(img_path)
+        image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         image = np.expand_dims(image, 0)
-        image = normalize_img(image)
+        image = normalize99(image)
 
     sh1 = image.shape[1]
     sh2 = image.shape[2]
@@ -99,12 +113,13 @@ def process_morphology(img_path, technology, d, j, i, border=0, loaded=None):
         image = image[:, 5000:10000, 30000:35000]
         membrane = np.sum(image[1:, :, :], axis=0)
         dapi = image[0, :, :]
-        image = normalize_img(np.stack([membrane, dapi]))
+        image = normalize99(np.stack([membrane, dapi]))
 
     if technology == "Custom":
-        image = tifffile.imread(img_path)
+        # image = tifffile.imread(img_path)
+        image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         image = np.expand_dims(image, 0)
-        image = normalize_img(image)
+        image = normalize99(image)
 
     sh1 = image.shape[1]
     sh2 = image.shape[2]

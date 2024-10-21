@@ -11,4 +11,4 @@
 module load python/3.11
 source /home/s4702415/sivenvgpu/bin/activate
 
-srun python /scratch/user/s4702415/SigCells/experiments/cellpose/melanoma/positive/positive.py
+srun python /scratch/user/s4702415/SigCells/experiments/cellpose/melanoma/positive/positive_revb.py

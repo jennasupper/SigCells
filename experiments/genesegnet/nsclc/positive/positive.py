@@ -49,7 +49,7 @@ if __name__=="__main__":
 
         dapi = tile[1]
         membrane = tile[0]
-        if heatmap.max() != 0 and dapi.max() != 0:
+        if heatmap.max() != 0 and dapi.max() > 0.5:
             break
 
     heatmap = torch.tensor(heatmap, dtype=torch.float64) + torch.randn(size=(d, d))

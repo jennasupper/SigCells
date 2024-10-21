@@ -58,8 +58,10 @@ if __name__=="__main__":
     # plt.savefig(f"/scratch/user/s4702415/SigCells/figures/mask_{i}_{j}.png")
     # plt.clf()
 
-    i = 65
-    j = 78
+    i = 37
+    j = 26
+    # 33, j = 9
+    # i = 37, j = 26
     d = 56
 
     path_56 = "/scratch/user/s4702415/trained_models/genesegnet/genesegnet_n56/GeneSegNet_hippocampus_residual_on_style_on_concatenation_off.929131_epoch_499.onnx"
